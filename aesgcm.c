@@ -613,8 +613,8 @@ initaesgcm(void)
 		Py_DECREF(module);
 		INITERROR;
 	}
-	//Py_INCREF(AuthenticationError);
-	//PyModule_AddObject(m, "AuthenticationError", AuthenticationError);
+	Py_INCREF(st->AuthenticationError);
+	PyModule_AddObject(module, "AuthenticationError", st->AuthenticationError);
 
 	{
 #if PY_MAJOR_VERSION < 3

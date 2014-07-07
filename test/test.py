@@ -58,6 +58,16 @@ class TestVectors(unittest.TestCase):
     def test_vec_3(self):
         self._verify_vec(self.VECTORS[2])
 
+    def test_invalid_tag(self):
+        vec = self.VECTORS[0]
+        invalid_tag = unhexlify(b'00000000000000000000000000000000')
+
+        dec = aesgcm.AES_GCM_Decrypt()
+        dec.init(vec['key'], vec['iv'], invalid_tag)
+        dec.decrypt(vec['ctx'])
+        self.assertRaises(aesgcm.AuthenticationError, dec.finalize)
+
+
 
 if __name__ == '__main__':
     unittest.main()
