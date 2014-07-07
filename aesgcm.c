@@ -49,10 +49,6 @@ typedef struct {
 } AES_GCM_Decrypt_object;
 
 
-static PyTypeObject AES_GCM_Encrypt_type;
-static PyTypeObject AES_GCM_Decrypt_type;
-
-
 struct module_state {
 	PyObject *AuthenticationError;
 };
@@ -114,66 +110,6 @@ static int translate_error_code(PyObject *m, int code)
 }
 
 
-static AES_GCM_Encrypt_object *
-new_AES_GCM_Encrypt_object(PyObject *module)
-{
-	AES_GCM_Encrypt_object *obj = (AES_GCM_Encrypt_object *)
-		PyObject_New(AES_GCM_Encrypt_object, &AES_GCM_Encrypt_type);
-
-	if (!obj) {
-		return NULL;
-	}
-
-	obj->module = module;
-	obj->enc_ctx = aes_gcm_create();
-
-	if (obj->enc_ctx == NULL) {
-		return NULL;
-	}
-
-	return obj;
-}
-
-
-static AES_GCM_Decrypt_object *
-new_AES_GCM_Decrypt_object(PyObject *module)
-{
-	AES_GCM_Decrypt_object *obj = (AES_GCM_Decrypt_object *)
-		PyObject_New(AES_GCM_Decrypt_object, &AES_GCM_Decrypt_type);
-
-	if (!obj) {
-		return NULL;
-	}
-
-	obj->module = module;
-	obj->dec_ctx = aes_gcm_create();
-
-	if (obj->dec_ctx == NULL) {
-		return NULL;
-	}
-
-	return obj;
-}
-
-
-static void
-AES_GCM_Encrypt_dealloc(PyObject *ptr)
-{
-	AES_GCM_Encrypt_object *obj = (AES_GCM_Encrypt_object *)ptr;
-	aes_gcm_destroy(obj->enc_ctx);
-
-	PyObject_Del(ptr);
-}
-
-
-static void
-AES_GCM_Decrypt_dealloc(PyObject *ptr)
-{
-	AES_GCM_Decrypt_object *obj = (AES_GCM_Decrypt_object *)ptr;
-	aes_gcm_destroy(obj->dec_ctx);
-
-	PyObject_Del(ptr);
-}
 
 /*
  * Encrypt context functions.
@@ -384,6 +320,26 @@ AES_GCM_Decrypt_init(AES_GCM_Decrypt_object *self, PyObject *args)
  *
  */
 
+
+static void
+AES_GCM_Encrypt_dealloc(PyObject *ptr)
+{
+	AES_GCM_Encrypt_object *obj = (AES_GCM_Encrypt_object *)ptr;
+	aes_gcm_destroy(obj->enc_ctx);
+
+	PyObject_Del(ptr);
+}
+
+
+static void
+AES_GCM_Decrypt_dealloc(PyObject *ptr)
+{
+	AES_GCM_Decrypt_object *obj = (AES_GCM_Decrypt_object *)ptr;
+	aes_gcm_destroy(obj->dec_ctx);
+
+	PyObject_Del(ptr);
+}
+
 static PyMethodDef AES_GCM_Encrypt_methods[] = {
 	{"init"  ,    (PyCFunction)AES_GCM_Encrypt_init,      METH_VARARGS, AES_GCM_Encrypt_init__doc__},
 	{"update_aad", (PyCFunction)AES_GCM_Encrypt_update_aad,      METH_VARARGS, AES_GCM_Encrypt_update_aad__doc__},
@@ -443,7 +399,7 @@ static PyMethodDef AES_GCM_Decrypt_methods[] = {
 	{"init"  ,    (PyCFunction)AES_GCM_Decrypt_init,      METH_VARARGS, AES_GCM_Decrypt_init__doc__},
 	{"update_aad", (PyCFunction)AES_GCM_Decrypt_update_aad,      METH_VARARGS, AES_GCM_Decrypt_update_aad__doc__},
 	{"decrypt",   (PyCFunction)AES_GCM_Decrypt_decrypt,   METH_VARARGS, AES_GCM_Decrypt_decrypt__doc__},
-	{"finalize",  (PyCFunction)AES_GCM_Decrypt_finalize,  METH_VARARGS, AES_GCM_Decrypt_finalize__doc__},
+	{"finalize",  (PyCFunction)AES_GCM_Decrypt_finalize,  METH_NOARGS, AES_GCM_Decrypt_finalize__doc__},
 	{NULL,        NULL}         /* sentinel */
 };
 
@@ -492,6 +448,52 @@ static PyTypeObject AES_GCM_Decrypt_type = {
 	AES_GCM_Decrypt_getseters,      /* tp_getset */
 };
 
+
+
+static AES_GCM_Encrypt_object *
+new_AES_GCM_Encrypt_object(PyObject *module)
+{
+	AES_GCM_Encrypt_object *obj = (AES_GCM_Encrypt_object *)
+		PyObject_New(AES_GCM_Encrypt_object, &AES_GCM_Encrypt_type);
+
+	if (!obj) {
+		return NULL;
+	}
+
+	obj->module = module;
+	obj->enc_ctx = aes_gcm_create();
+
+	if (obj->enc_ctx == NULL) {
+		return NULL;
+	}
+
+	return obj;
+}
+
+
+static AES_GCM_Decrypt_object *
+new_AES_GCM_Decrypt_object(PyObject *module)
+{
+	AES_GCM_Decrypt_object *obj = (AES_GCM_Decrypt_object *)
+		PyObject_New(AES_GCM_Decrypt_object, &AES_GCM_Decrypt_type);
+
+	if (!obj) {
+		return NULL;
+	}
+
+	obj->module = module;
+	obj->dec_ctx = aes_gcm_create();
+
+	if (obj->dec_ctx == NULL) {
+		return NULL;
+	}
+
+	return obj;
+}
+
+
+
+
 /*
  * Create new objects...
  */
@@ -537,8 +539,8 @@ AES_GCM_Decrypt_new(PyObject *self, PyObject *args, PyObject *kwdict)
 
 
 static struct PyMethodDef AES_GCM_functions[] = {
-	{"AES_GCM_Encrypt", (PyCFunction)AES_GCM_Encrypt_new, METH_VARARGS|METH_KEYWORDS, AES_GCM_Encrypt_new__doc__},
-	{"AES_GCM_Decrypt", (PyCFunction)AES_GCM_Decrypt_new, METH_VARARGS|METH_KEYWORDS, AES_GCM_Decrypt_new__doc__},
+	{"AES_GCM_Encrypt", (PyCFunction)AES_GCM_Encrypt_new, METH_NOARGS, AES_GCM_Encrypt_new__doc__},
+	{"AES_GCM_Decrypt", (PyCFunction)AES_GCM_Decrypt_new, METH_NOARGS, AES_GCM_Decrypt_new__doc__},
 	{NULL,      NULL}            /* Sentinel */
 };
 
