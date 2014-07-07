@@ -60,7 +60,7 @@ static int translate_error_code(int code)
 	switch (code) {
 
 	case AES_GCM_ERR_INVALID_KEY_SIZE:
-		PyErr_SetString(PyExc_ValueError, "key size must be 128, 192 or 256");
+		PyErr_SetString(PyExc_ValueError, "key size must be 128, 192 or 256 bits");
 		break;
 	case AES_GCM_ERR_INVALID_KEY:
 		PyErr_SetString(PyExc_ValueError, "invalid key");
