@@ -53,10 +53,10 @@ class TestVectors(unittest.TestCase):
         self._verify_vec(self.VECTORS[0])
 
     def test_vec_2(self):
-        self._verify_vec(self.VECTORS[0])
+        self._verify_vec(self.VECTORS[1])
 
     def test_vec_3(self):
-        self._verify_vec(self.VECTORS[0])
+        self._verify_vec(self.VECTORS[2])
 
 
 if __name__ == '__main__':
