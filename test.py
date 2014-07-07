@@ -12,17 +12,17 @@ def test():
     obj.init(KEY, IV)
     obj.update_aad(AAD)
     CTX = obj.encrypt(PTX)
-    print [CTX]
+    print(CTX)
     TAG = obj.finalize()
-    print [TAG]
+    print(TAG)
 
     dec = aesgcm.AES_GCM_Decrypt()
 
     dec.init(KEY, IV, TAG)
     dec.update_aad(AAD)
-    print [dec.decrypt(CTX)]
+    print(dec.decrypt(CTX))
 
     # may throw
-    print [dec.finalize()]
+    print(dec.finalize())
 
 test()

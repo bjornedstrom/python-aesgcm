@@ -37,12 +37,14 @@
 
 typedef struct {
 	PyObject_HEAD
+	PyObject *module;
 	AES_GCM_CTX *enc_ctx;
 } AES_GCM_Encrypt_object;
 
 
 typedef struct {
 	PyObject_HEAD
+	PyObject *module;
 	AES_GCM_CTX *dec_ctx;
 } AES_GCM_Decrypt_object;
 
@@ -50,11 +52,23 @@ typedef struct {
 static PyTypeObject AES_GCM_Encrypt_type;
 static PyTypeObject AES_GCM_Decrypt_type;
 
-static PyObject *AuthenticationError;
+
+struct module_state {
+	PyObject *AuthenticationError;
+};
 
 
-static int translate_error_code(int code)
+#if PY_MAJOR_VERSION >= 3
+#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+#else
+#define GETSTATE(m) (&_state)
+static struct module_state _state;
+#endif
+
+
+static int translate_error_code(PyObject *m, int code)
 {
+	struct module_state *st = GETSTATE(m);
 	char tmp[16];
 
 	switch (code) {
@@ -87,7 +101,7 @@ static int translate_error_code(int code)
 		break;
 
 	case AES_GCM_ERR_AUTH:
-		PyErr_SetString(AuthenticationError, "authentication failed");
+		PyErr_SetString(st->AuthenticationError, "authentication failed");
 		break;
 
 	default:
@@ -101,7 +115,7 @@ static int translate_error_code(int code)
 
 
 static AES_GCM_Encrypt_object *
-new_AES_GCM_Encrypt_object(void)
+new_AES_GCM_Encrypt_object(PyObject *module)
 {
 	AES_GCM_Encrypt_object *obj = (AES_GCM_Encrypt_object *)
 		PyObject_New(AES_GCM_Encrypt_object, &AES_GCM_Encrypt_type);
@@ -110,6 +124,7 @@ new_AES_GCM_Encrypt_object(void)
 		return NULL;
 	}
 
+	obj->module = module;
 	obj->enc_ctx = aes_gcm_create();
 
 	if (obj->enc_ctx == NULL) {
@@ -121,7 +136,7 @@ new_AES_GCM_Encrypt_object(void)
 
 
 static AES_GCM_Decrypt_object *
-new_AES_GCM_Decrypt_object(void)
+new_AES_GCM_Decrypt_object(PyObject *module)
 {
 	AES_GCM_Decrypt_object *obj = (AES_GCM_Decrypt_object *)
 		PyObject_New(AES_GCM_Decrypt_object, &AES_GCM_Decrypt_type);
@@ -130,6 +145,7 @@ new_AES_GCM_Decrypt_object(void)
 		return NULL;
 	}
 
+	obj->module = module;
 	obj->dec_ctx = aes_gcm_create();
 
 	if (obj->dec_ctx == NULL) {
@@ -178,7 +194,7 @@ AES_GCM_Encrypt_update_aad(AES_GCM_Encrypt_object *self, PyObject *args)
 	int ret = aes_gcm_update_aad(self->enc_ctx, aad_size, aad);
 
 	if (ret != 0) {
-		translate_error_code(ret);
+		translate_error_code(self->module, ret);
 		return NULL;
 	}
 
@@ -201,7 +217,7 @@ AES_GCM_Encrypt_finalize(AES_GCM_Encrypt_object *self, PyObject *args)
 	int ret = aes_gcm_encrypt_finalize(self->enc_ctx, tag_size, tag);
 
 	if (ret != 0) {
-		translate_error_code(ret);
+		translate_error_code(self->module, ret);
 		return NULL;
 	}
 
@@ -224,7 +240,7 @@ AES_GCM_Encrypt_encrypt(AES_GCM_Encrypt_object *self, PyObject *args)
 
 	int ret = aes_gcm_encrypt_update(self->enc_ctx, pt_size, pt, ct);
 	if (ret != 0) {
-		translate_error_code(ret);
+		translate_error_code(self->module, ret);
 		return NULL;
 	}
 
@@ -252,7 +268,7 @@ AES_GCM_Encrypt_init(AES_GCM_Encrypt_object *self, PyObject *args)
 
 	int ret = aes_gcm_init_encrypt(self->enc_ctx, key_size_bits, key, iv_len, iv);
 	if (ret != 0) {
-		translate_error_code(ret);
+		translate_error_code(self->module, ret);
 		return NULL;
 	}
 
@@ -280,7 +296,7 @@ AES_GCM_Decrypt_update_aad(AES_GCM_Decrypt_object *self, PyObject *args)
 	int ret = aes_gcm_update_aad(self->dec_ctx, aad_size, aad);
 
 	if (ret != 0) {
-		translate_error_code(ret);
+		translate_error_code(self->module, ret);
 		return NULL;
 	}
 
@@ -297,13 +313,13 @@ AES_GCM_Decrypt_finalize(AES_GCM_Decrypt_object *self, PyObject *args)
 	int verified;
 	int ret = aes_gcm_decrypt_finalize(self->dec_ctx, &verified);
 	if (ret > 0) {
-		translate_error_code(ret);
+		translate_error_code(self->module, ret);
 		return NULL;
 	}
 
 	// Lets be explicit with this.
 	if (!verified) {
-		translate_error_code(AES_GCM_ERR_AUTH);
+		translate_error_code(self->module, AES_GCM_ERR_AUTH);
 		return NULL;
 	}
 
@@ -327,7 +343,7 @@ AES_GCM_Decrypt_decrypt(AES_GCM_Decrypt_object *self, PyObject *args)
 
 	int ret = aes_gcm_decrypt_update(self->dec_ctx, ct_size, ct, pt);
 	if (ret != 0) {
-		translate_error_code(ret);
+		translate_error_code(self->module, ret);
 		return NULL;
 	}
 
@@ -355,7 +371,7 @@ AES_GCM_Decrypt_init(AES_GCM_Decrypt_object *self, PyObject *args)
 
 	int ret = aes_gcm_init_decrypt(self->dec_ctx, key_size_bits, key, iv_len, iv, tag_len, tag);
 	if (ret != 0) {
-		translate_error_code(ret);
+		translate_error_code(self->module, ret);
 		return NULL;
 	}
 
@@ -488,7 +504,7 @@ AES_GCM_Encrypt_new(PyObject *self, PyObject *args, PyObject *kwdict)
 {
 	AES_GCM_Encrypt_object *new;
 
-	if ((new = new_AES_GCM_Encrypt_object()) == NULL)
+	if ((new = new_AES_GCM_Encrypt_object(self)) == NULL)
 		return NULL;
 
 	if (PyErr_Occurred()) {
@@ -508,7 +524,7 @@ AES_GCM_Decrypt_new(PyObject *self, PyObject *args, PyObject *kwdict)
 {
 	AES_GCM_Decrypt_object *new;
 
-	if ((new = new_AES_GCM_Decrypt_object()) == NULL)
+	if ((new = new_AES_GCM_Decrypt_object(self)) == NULL)
 		return NULL;
 
 	if (PyErr_Occurred()) {
@@ -527,27 +543,76 @@ static struct PyMethodDef AES_GCM_functions[] = {
 };
 
 
-PyMODINIT_FUNC
-initaesgcm(void)
-{
-	PyObject *m;
+//PyMODINIT_FUNC
+//initaesgcm(void)
+#if PY_MAJOR_VERSION >= 3
 
+static int aesgcm_traverse(PyObject *m, visitproc visit, void *arg) {
+    Py_VISIT(GETSTATE(m)->AuthenticationError);
+    return 0;
+}
+
+static int aesgcm_clear(PyObject *m) {
+    Py_CLEAR(GETSTATE(m)->AuthenticationError);
+    return 0;
+}
+
+
+static struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "aesgcm",
+        NULL,
+        sizeof(struct module_state),
+        AES_GCM_functions,
+        NULL,
+        aesgcm_traverse,
+        aesgcm_clear,
+        NULL
+};
+
+#define INITERROR return NULL
+
+PyObject *
+PyInit_aesgcm(void)
+
+#else
+#define INITERROR return
+
+void
+initaesgcm(void)
+#endif
+{
+#if PY_MAJOR_VERSION >= 3
+	PyObject *module = PyModule_Create(&moduledef);
+#else
+	PyObject *module = Py_InitModule3("aesgcm", AES_GCM_functions, "Module for AES-GCM crypto.");
+#endif
+
+	if (module == NULL)
+		INITERROR;
+	struct module_state *st = GETSTATE(module);
+
+	// TODO (bjorn): Do these have to go to state???
 	Py_TYPE(&AES_GCM_Encrypt_type) = &PyType_Type;
 	if (PyType_Ready(&AES_GCM_Encrypt_type) < 0) {
-		return;
+		INITERROR;
 	}
 
 	Py_TYPE(&AES_GCM_Decrypt_type) = &PyType_Type;
 	if (PyType_Ready(&AES_GCM_Decrypt_type) < 0) {
-		return;
+		INITERROR;
 	}
 
-	m = Py_InitModule3("aesgcm", AES_GCM_functions, "Module for AES-GCM crypto.");
-	if (m == NULL) {
-		return;
-	}
 
-	AuthenticationError = PyErr_NewException("aesgcm.AuthenticationError", NULL, NULL);
-	Py_INCREF(AuthenticationError);
-	PyModule_AddObject(m, "AuthenticationError", AuthenticationError);
+	st->AuthenticationError = PyErr_NewException("aesgcm.AuthenticationError", NULL, NULL);
+	if (st->AuthenticationError == NULL) {
+		Py_DECREF(module);
+		INITERROR;
+	}
+	//Py_INCREF(AuthenticationError);
+	//PyModule_AddObject(m, "AuthenticationError", AuthenticationError);
+
+#if PY_MAJOR_VERSION >= 3
+	return module;
+#endif
 }
