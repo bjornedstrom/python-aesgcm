@@ -16,6 +16,8 @@ def test():
     TAG = obj.finalize()
     print(TAG)
 
+    TAG = b'0' + TAG[1:]
+
     dec = aesgcm.AES_GCM_Decrypt()
 
     dec.init(KEY, IV, TAG)

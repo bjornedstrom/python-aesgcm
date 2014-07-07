@@ -31,6 +31,8 @@
  * use in the OpenSSL Toolkit. (http://www.openssl.org/)"
  */
 
+#define _VERSION "0.0.0"
+
 #include "Python.h"
 #include "structmember.h"
 #include "aes-gcm-wrapper.h"
@@ -397,7 +399,7 @@ static PyTypeObject AES_GCM_Encrypt_type = {
 
 static PyMethodDef AES_GCM_Decrypt_methods[] = {
 	{"init"  ,    (PyCFunction)AES_GCM_Decrypt_init,      METH_VARARGS, AES_GCM_Decrypt_init__doc__},
-	{"update_aad", (PyCFunction)AES_GCM_Decrypt_update_aad,      METH_VARARGS, AES_GCM_Decrypt_update_aad__doc__},
+	{"update_aad", (PyCFunction)AES_GCM_Decrypt_update_aad,METH_VARARGS, AES_GCM_Decrypt_update_aad__doc__},
 	{"decrypt",   (PyCFunction)AES_GCM_Decrypt_decrypt,   METH_VARARGS, AES_GCM_Decrypt_decrypt__doc__},
 	{"finalize",  (PyCFunction)AES_GCM_Decrypt_finalize,  METH_NOARGS, AES_GCM_Decrypt_finalize__doc__},
 	{NULL,        NULL}         /* sentinel */
@@ -613,6 +615,17 @@ initaesgcm(void)
 	}
 	//Py_INCREF(AuthenticationError);
 	//PyModule_AddObject(m, "AuthenticationError", AuthenticationError);
+
+	{
+#if PY_MAJOR_VERSION < 3
+		PyObject *s = PyString_FromString(_VERSION);
+#else
+		PyObject *s = PyUnicode_FromString(_VERSION);
+#endif
+		PyObject *dict = PyModule_GetDict(module);
+		PyDict_SetItemString(dict, "__version__", s);
+		Py_DECREF(s);
+	}
 
 #if PY_MAJOR_VERSION >= 3
 	return module;
