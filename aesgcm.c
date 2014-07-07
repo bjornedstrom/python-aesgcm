@@ -205,7 +205,7 @@ AES_GCM_Encrypt_finalize(AES_GCM_Encrypt_object *self, PyObject *args)
 		return NULL;
 	}
 
-	return PyString_FromStringAndSize((const char *)tag, tag_size);
+	return PyBytes_FromStringAndSize((const char *)tag, tag_size);
 }
 
 PyDoc_STRVAR(AES_GCM_Encrypt_encrypt__doc__,
@@ -228,7 +228,7 @@ AES_GCM_Encrypt_encrypt(AES_GCM_Encrypt_object *self, PyObject *args)
 		return NULL;
 	}
 
-	PyObject *py_ct = PyString_FromStringAndSize((const char *)ct, pt_size);
+	PyObject *py_ct = PyBytes_FromStringAndSize((const char *)ct, pt_size);
 
 	free(ct);
 
@@ -331,7 +331,7 @@ AES_GCM_Decrypt_decrypt(AES_GCM_Decrypt_object *self, PyObject *args)
 		return NULL;
 	}
 
-	PyObject *py_pt = PyString_FromStringAndSize((const char *)pt, ct_size);
+	PyObject *py_pt = PyBytes_FromStringAndSize((const char *)pt, ct_size);
 
 	free(pt);
 
@@ -542,7 +542,7 @@ initaesgcm(void)
 		return;
 	}
 
-	m = Py_InitModule("aesgcm", AES_GCM_functions);
+	m = Py_InitModule3("aesgcm", AES_GCM_functions, "Module for AES-GCM crypto.");
 	if (m == NULL) {
 		return;
 	}
