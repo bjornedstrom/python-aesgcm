@@ -31,7 +31,7 @@
  * use in the OpenSSL Toolkit. (http://www.openssl.org/)
  */
 
-#define _VERSION "0.0.0"
+#define _VERSION "0.0.9"
 
 #include "Python.h"
 #include "structmember.h"

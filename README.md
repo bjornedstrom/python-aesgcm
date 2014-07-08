@@ -1,5 +1,5 @@
 # python-aesgcm
-Version `0.0.0` - 8 July 2014
+Version `0.0.9` - 8 July 2014
 
 `aesgcm` is a Python module for AES-GCM.
 

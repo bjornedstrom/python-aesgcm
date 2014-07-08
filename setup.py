@@ -9,7 +9,7 @@ aesgcm = Extension('_aesgcm',
                    libraries = ['crypto'])
 
 setup(name='aesgcm',
-      version='0.0',
+      version='0.0.9',
       description='AES-GCM for Python',
       author='Björn Edström',
       author_email='be@bjrn.se',
