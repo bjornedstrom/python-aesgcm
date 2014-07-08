@@ -135,7 +135,12 @@ class DecryptObject(object):
             tampered with.
         """
 
+        valid = True
         try:
             return self.ctx.finalize()
         except _aesgcm.AuthenticationError:
-            raise AuthenticationError()
+            # Hide chain from Python 3.
+            valid = False
+
+        if not valid:
+            raise AuthenticationError('authentication failed')
