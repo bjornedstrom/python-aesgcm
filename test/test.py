@@ -33,10 +33,8 @@ class TestVectors(unittest.TestCase):
         ]
 
     def _verify_vec(self, vec):
-        enc = aesgcm.AES_GCM_Encrypt()
-        enc.init(vec['key'], vec['iv'])
-        dec = aesgcm.AES_GCM_Decrypt()
-        dec.init(vec['key'], vec['iv'], vec['tag'])
+        enc = aesgcm.EncryptObject(vec['key'], vec['iv'])
+        dec = aesgcm.DecryptObject(vec['key'], vec['iv'], vec['tag'])
 
         if vec['aad']:
             enc.update_aad(vec['aad'])
@@ -46,7 +44,7 @@ class TestVectors(unittest.TestCase):
             self.assertEqual(vec['ctx'], enc.encrypt(vec['ptx']))
             self.assertEqual(vec['ptx'], dec.decrypt(vec['ctx']))
 
-        self.assertEqual(vec['tag'], enc.finalize(16))
+        self.assertEqual(vec['tag'], enc.finalize())
         self.assertTrue(dec.finalize())
 
     def test_vec_1(self):
@@ -62,8 +60,7 @@ class TestVectors(unittest.TestCase):
         vec = self.VECTORS[0]
         invalid_tag = unhexlify(b'00000000000000000000000000000000')
 
-        dec = aesgcm.AES_GCM_Decrypt()
-        dec.init(vec['key'], vec['iv'], invalid_tag)
+        dec = aesgcm.DecryptObject(vec['key'], vec['iv'], invalid_tag)
         dec.decrypt(vec['ctx'])
         self.assertRaises(aesgcm.AuthenticationError, dec.finalize)
 

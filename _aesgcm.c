@@ -363,7 +363,7 @@ static PyMemberDef AES_GCM_Encrypt_members[] = {
 
 static PyTypeObject AES_GCM_Encrypt_type = {
 	PyVarObject_HEAD_INIT(NULL, 0)
-	"aesgcm.AES_GCM_Encrypt",    /*tp_name*/
+	"_aesgcm.AES_GCM_Encrypt",    /*tp_name*/
 	sizeof(AES_GCM_Encrypt_object),  /*tp_size*/
 	0,                  /*tp_itemsize*/
 	/* methods */
@@ -418,7 +418,7 @@ static PyMemberDef AES_GCM_Decrypt_members[] = {
 
 static PyTypeObject AES_GCM_Decrypt_type = {
 	PyVarObject_HEAD_INIT(NULL, 0)
-	"aesgcm.AES_GCM_Decrypt",    /*tp_name*/
+	"_aesgcm.AES_GCM_Decrypt",    /*tp_name*/
 	sizeof(AES_GCM_Decrypt_object),  /*tp_size*/
 	0,                  /*tp_itemsize*/
 	/* methods */
@@ -564,7 +564,7 @@ static int aesgcm_clear(PyObject *m) {
 
 static struct PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
-        "aesgcm",
+        "_aesgcm",
         NULL,
         sizeof(struct module_state),
         AES_GCM_functions,
@@ -577,19 +577,19 @@ static struct PyModuleDef moduledef = {
 #define INITERROR return NULL
 
 PyObject *
-PyInit_aesgcm(void)
+PyInit__aesgcm(void)
 
 #else
 #define INITERROR return
 
 void
-initaesgcm(void)
+init_aesgcm(void)
 #endif
 {
 #if PY_MAJOR_VERSION >= 3
 	PyObject *module = PyModule_Create(&moduledef);
 #else
-	PyObject *module = Py_InitModule3("aesgcm", AES_GCM_functions, "Module for AES-GCM crypto.");
+	PyObject *module = Py_InitModule3("_aesgcm", AES_GCM_functions, "Module for AES-GCM crypto.");
 #endif
 
 	if (module == NULL)
@@ -607,8 +607,7 @@ initaesgcm(void)
 		INITERROR;
 	}
 
-
-	st->AuthenticationError = PyErr_NewException("aesgcm.AuthenticationError", NULL, NULL);
+	st->AuthenticationError = PyErr_NewException("_aesgcm.AuthenticationError", NULL, NULL);
 	if (st->AuthenticationError == NULL) {
 		Py_DECREF(module);
 		INITERROR;
