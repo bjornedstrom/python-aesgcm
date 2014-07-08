@@ -8,8 +8,7 @@ def test():
     CTX = None
     TAG = None
 
-    obj = aesgcm.AES_GCM_Encrypt()
-    obj.init(KEY, IV)
+    obj = aesgcm.EncryptObject(KEY, IV)
     obj.update_aad(AAD)
     CTX = obj.encrypt(PTX)
     print(CTX)
@@ -18,13 +17,15 @@ def test():
 
     TAG = b'0' + TAG[1:]
 
-    dec = aesgcm.AES_GCM_Decrypt()
-
-    dec.init(KEY, IV, TAG)
+    dec = aesgcm.DecryptObject(KEY, IV, TAG)
     dec.update_aad(AAD)
+
     print(dec.decrypt(CTX))
 
     # may throw
-    print(dec.finalize())
+    try:
+        print(dec.finalize())
+    except aesgcm.AuthenticationError:
+        print('AUTH ERROR')
 
 test()
