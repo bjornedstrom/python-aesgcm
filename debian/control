@@ -1,0 +1,12 @@
+Source: python-aesgcm
+Section: python
+Priority: optional
+Maintainer: Björn Edström <be@bjrn.se>
+Build-Depends: debhelper (>= 7), python (>= 2.6), libc6 (>= 2.4), libssl-dev
+Standards-Version: 3.8.3
+
+Package: python-aesgcm
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, python
+Description: AES-GCM module for Python.
+  C module for AES-GCM.
