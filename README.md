@@ -17,6 +17,11 @@ There are unit tests in the `test` directory and an example in `example.py`
 
 Please see `example.py` for an example.
 
+Code documentation can be read by:
+
+    >>> import aesgcm
+    >>> help(aesgcm)
+
 ## Author
 
 python-aesgcm is written by Björn Edström in 2014. See LICENSE for details.
