@@ -1,0 +1,7 @@
+include *.c
+include *.h
+include *.py
+include aesgcm/*.py
+include test/*.py
+include README.md
+include LICENSE
