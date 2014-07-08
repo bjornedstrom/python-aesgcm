@@ -1,0 +1,13 @@
+*~
+*.pyc
+
+build/
+
+dist/
+MANIFEST
+
+debian/files
+debian/*.log
+debian/*.debhelper
+debian/*.substvars
+debian/python-aesgcm/
