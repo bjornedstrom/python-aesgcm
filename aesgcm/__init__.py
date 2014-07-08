@@ -30,6 +30,8 @@
 # use in the OpenSSL Toolkit. (http://www.openssl.org/)
 
 """Module for AES-GCM crypto.
+
+This module provides two classes - EncryptObject and DecryptObject.
 """
 
 import _aesgcm
@@ -45,6 +47,11 @@ class AuthenticationError(Exception):
 
 class EncryptObject(object):
     """ A class for AES-GCM encryption.
+
+    ..warning::
+        It is up to the user to synchronize the calls in a
+        multi-threaded application. It's advised to let this object be
+        owned by a single thread.
 
     ..note::
         May throw `ValueError` if any of the function parameters are
@@ -105,6 +112,11 @@ class EncryptObject(object):
 
 class DecryptObject(object):
     """ A class for AES-GCM decryption.
+
+    ..warning::
+        It is up to the user to synchronize the calls in a
+        multi-threaded application. It's advised to let this object be
+        owned by a single thread.
 
     ..note::
         May throw `ValueError` if any of the function parameters are
