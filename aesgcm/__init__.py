@@ -67,6 +67,9 @@ class EncryptObject(object):
         :type iv: str/buffer
         """
 
+        if len(iv) != 12:
+            raise ValueError('iv should be exactly 12 bytes')
+
         self.ctx = _aesgcm.AES_GCM_Encrypt()
         self.ctx.init(key, iv)
 
